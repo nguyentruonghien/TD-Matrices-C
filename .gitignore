@@ -1,0 +1,15 @@
+# Fichiers objets
+*.o
+
+# Executables et fichiers de compilation
+*.out
+*.dSYM/
+test_ex1
+test_ex2
+test_ex3
+demo_matrices
+
+# Fichiers systeme et editeur
+.DS_Store
+.vscode/
+__MACOSX/
