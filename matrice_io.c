@@ -47,6 +47,11 @@ void mat_afficher(const char *nom, const Matrice *m)
     /* (2.a) À COMPLÉTER : pour chaque ligne i, afficher chaque
      *       coefficient avec printf(" %8d", m->coef[i][j]),
      *       puis passer à la ligne avec putchar('\n').               */
+    for (int i = 0; i < m->nb_lignes; i++) {
+        for (int j = 0; j < m->nb_colonnes; j++)
+            printf(" %8d", m->coef[i][j]);
+        putchar('\n');
+    }
 }
 
 MatErreur mat_ecrire(FILE *f, const Matrice *m)
@@ -67,6 +72,15 @@ MatErreur mat_ecrire(FILE *f, const Matrice *m)
 
 
     /* FOURNI : forcer l'écriture du tampon et détecter une erreur. */
+    for (int i = 0; i < m->nb_lignes; i++) {
+        for (int j = 0; j < m->nb_colonnes; j++) {
+            if (fprintf(f, j == 0 ? "%d" : " %d", m->coef[i][j]) < 0)
+                return MAT_ERR_ECRITURE;
+        }
+        if (fputc('\n', f) == EOF)
+            return MAT_ERR_ECRITURE;
+    }
+    
     if (fflush(f) == EOF)
         return MAT_ERR_ECRITURE;
     return MAT_OK;
@@ -109,5 +123,26 @@ MatErreur mat_lire(FILE *f, Matrice *res)
     /* (2.f) À COMPLÉTER : tout a réussi, on transfère le résultat :
      *         *res = tmp;  return MAT_OK;                             */
 
-    return MAT_ERR_LECTURE;  /* ligne provisoire : à remplacer en (2.f) */
+    /* ligne provisoire : à remplacer en (2.f) */
+    
+    if (nb_lignes < 1 || nb_lignes > MAT_DIM_MAX ||
+        nb_colonnes < 1 || nb_colonnes > MAT_DIM_MAX)
+        return MAT_ERR_FORMAT;
+
+    Matrice tmp = MATRICE_VIDE;
+    err = mat_allouer(&tmp, nb_lignes, nb_colonnes);
+    if (err != MAT_OK)
+        return err;
+
+    for (int i = 0; i < nb_lignes; i++) {
+        for (int j = 0; j < nb_colonnes; j++) {
+            err = lire_entier(f, &tmp.coef[i][j]);
+            if (err != MAT_OK) {
+                mat_detruire(&tmp);
+                return err;
+            }
+        }
+    }
+    *res = tmp;
+    return MAT_OK;
 }
