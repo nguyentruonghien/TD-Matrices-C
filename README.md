@@ -213,13 +213,21 @@ Valgrind : [À COMPLÉTER].
 #### C. Questions de réflexion
 
 Q6.1. Pourquoi le message d'erreur est-il affiché par main.c (ou ses fonctions static) et non par mat_lire ? Pensez à un programme graphique réutilisant la bibliothèque.
-Réponse : [À COMPLÉTER]
+Réponse : La fonction `mat_lire` doit seulement lire une matrice et retourner un code d'erreur. C'est au programme principal de décider comment afficher cette erreur.
+
+Cette séparation permet de réutiliser la bibliothèque dans différents programmes. Par exemple, une application graphique pourrait afficher l'erreur dans une fenêtre au lieu de l'afficher dans le terminal.
 
 Q6.2. Pourquoi le résultat de fclose est-il testé dans sauvegarder mais pas dans charger ?
-Réponse : [À COMPLÉTER]
+Réponse : Dans `sauvegarder`, le résultat de `fclose` est vérifié, car une erreur d'écriture peut apparaître lors de la fermeture du fichier. Certaines données peuvent encore être en mémoire tampon et ne pas avoir été enregistrées.
+
+Dans `charger`, le fichier est ouvert en lecture. La fermeture ne sert pas à enregistrer des données. C'est pourquoi le code fourni ne vérifie pas le résultat de `fclose`.
 
 Q6.3. Dans le scénario 8, le calcul a réussi mais l'enregistrement a échoué. Combien de matrices faut-il libérer ? Vérifiez que votre programme le fait.
-Réponse : [À COMPLÉTER]
+Réponse : Il faut libérer les trois matrices : A, B et R.
+
+Même si l'enregistrement échoue, les trois matrices ont déjà été créées en mémoire. Le programme utilise `goto nettoyage` pour accéder au point de nettoyage commun.
+
+Les fonctions `mat_detruire(&r)`, `mat_detruire(&b)` et `mat_detruire(&a)` sont alors appelées pour libérer les trois matrices et éviter les fuites de mémoire.
 
 ## 4. Vérifications mémoire
 
