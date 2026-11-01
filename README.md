@@ -251,12 +251,106 @@ Les fonctions `mat_detruire(&r)`, `mat_detruire(&b)` et `mat_detruire(&a)` sont 
 
 ## 4. Vérifications mémoire
 
-*À compléter.*
+Les tests fonctionnels ne prouvent pas à eux seuls l’absence de fuite mémoire. Valgrind n’étant pas disponible dans l’environnement de vérification utilisé ici, il reste à exécuter sous Linux :
+
+```bash
+valgrind --leak-check=full --show-leak-kinds=all ./test_ex1
+valgrind --leak-check=full --show-leak-kinds=all ./test_ex2
+valgrind --leak-check=full --show-leak-kinds=all ./test_ex3
+valgrind --leak-check=full --show-leak-kinds=all ./demo_matrices mul A.txt C.txt resultat.txt
+```
+
+Reporter ici les résultats réels (« definitely lost », « indirectly lost », codes de retour), sans les inventer.
 
 ## 5. Démonstration finale
 
-*À compléter.*
+## 5. Démonstration finale
+
+Le programme `demo_matrices` permet de réaliser l'addition et la multiplication de deux matrices à partir de fichiers texte.
+
+### 5.1 Compilation avec Makefile
+
+Le projet contient un `Makefile` qui permet de compiler automatiquement les fichiers sources.
+
+Pour compiler le projet :
+
+```bash
+make
+```
+
+Cette commande permet de générer les programmes `test_ex1`, `test_ex2`, `test_ex3` et `demo_matrices`.
+
+Pour exécuter les tests :
+
+```bash
+make test
+```
+
+### 5.2 Addition de deux matrices
+
+Pour additionner les matrices A et B :
+
+```bash
+./demo_matrices add donnees/A.txt donnees/B.txt R.txt
+```
+
+Le programme lit les deux matrices, calcule leur somme et enregistre le résultat dans `R.txt`.
+
+Résultat attendu :
+
+```text
+4 3
+26 50 87
+19 38 17
+52 96 19
+10 23 7
+```
+
+### 5.3 Multiplication de deux matrices
+
+Pour multiplier les matrices A et C :
+
+```bash
+./demo_matrices mul donnees/A.txt donnees/C.txt R.txt
+```
+
+Résultat attendu :
+
+```text
+4 2
+193 -36
+37 22
+65 78
+-10 17
+```
+
+### 5.4 Gestion des erreurs
+
+Le programme vérifie les dimensions des matrices et la validité des fichiers.
+
+Les scénarios suivants permettent de tester la gestion des erreurs :
+
+- Addition de matrices avec des dimensions incompatibles.
+- Lecture d'un fichier contenant des données invalides.
+- Lecture d'un fichier incomplet.
+- Lecture d'un fichier inexistant.
+
+Dans ces situations, le programme doit afficher un message d'erreur et renvoyer un code de retour non nul.
+
+### 5.5 Vérification automatique
+
+Le projet utilise GitHub Actions avec le fichier `verification.yml`.
+
+À chaque push, ce workflow vérifie notamment :
+
+- La structure du dépôt et les fichiers nécessaires.
+- La compilation du programme.
+- Les tests des exercices 1, 2 et 3.
+- La gestion de la mémoire avec Valgrind.
+- Le fonctionnement de `demo_matrices` dans différents scénarios.
+
+La dernière exécution observée de GitHub Actions s'est terminée avec le statut **Success**. Deux avertissements ont été signalés : l'utilisation de Node.js 20 par `actions/checkout@v4` et l'absence de Makefile dans cette version du dépôt. Le Makefile ayant été ajouté ensuite, sa présence doit être confirmée lors d'une nouvelle exécution.
 
 ## 6. Bilan et difficultés
 
-*À compléter.*
+HO Viet Manh Hung: 

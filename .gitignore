@@ -13,5 +13,3 @@ demo_matrices
 .DS_Store
 .vscode/
 __MACOSX/
-
-*.exe
