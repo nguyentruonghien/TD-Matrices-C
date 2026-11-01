@@ -133,17 +133,16 @@ Valgrind : [À COMPLÉTER].
 #### C. Questions de réflexion
 
 Q4.1. Pourquoi mat_lire remplit-elle d'abord une matrice locale avant de l'affecter à *res ?
-Réponse : [À COMPLÉTER]
+Réponse : Une matrice locale permet de construire le résultat entièrement avant de le transmettre à l’appelant. Si une lecture échoue, on libère cette matrice locale et *res reste vide.
 
 Q4.2. La lecture vérifie-t-elle que chaque ligne de la matrice est sur sa propre ligne de texte ? Est-ce nécessaire ?
-Réponse : [À COMPLÉTER]
+Réponse : Non. lire_entier utilise fscanf, qui accepte les espaces, tabulations et retours à la ligne comme séparateurs. Il suffit de lire le nombre de coefficients annoncé par les dimensions.
 
 Q4.3. Après mat_lire(f, &m), le flux f est positionné après le dernier coefficient. Comment cette propriété peut-elle être exploitée ?
-Réponse : [À COMPLÉTER]
+Réponse : On peut continuer à lire dans le même flux, par exemple pour récupérer une seconde matrice enregistrée à la suite de la première.
 
 Q4.4. Pourquoi mat_ecrire appelle-t-elle fflush avant de renvoyer MAT_OK ? Cela dispense-t-il de vérifier fclose ?
-Réponse : [À COMPLÉTER]
-
+Réponse : fflush force la transmission des données tamponnées et permet de détecter une erreur d’écriture. Cela ne dispense pas de vérifier fclose, qui peut encore signaler une erreur.
 ---
 
 ### 3.3 Exercice 3 — Calcul matriciel
@@ -164,25 +163,46 @@ Fichier : matrice_calcul.c.
 
 #### B. Résultats et vérifications
 
-Tests : [À COMPLÉTER]/14.
+Tests : 14/14.
 
-Compilation : [À COMPLÉTER].
+=== Exercice 3 : addition ===
+[OK]    (3.a) (2 x 3) + (3 x 2) : MAT_ERR_DIMENSIONS
+[OK]    (3.d) (2 x 3) + (2 x 3) : MAT_OK
+[OK]    (3.c) a + b est correct
+[OK]    a et b n'ont pas ete modifiees
+[OK]    (3.b) le resultat possede sa propre memoire
+[OK]    (3.c) INT_MAX + 1 : MAT_ERR_DEPASSEMENT
+=== Exercice 3 : multiplication ===
+[OK]    (3.e) (2 x 3) x (2 x 3) : MAT_ERR_DIMENSIONS
+[OK]    (3.h) (2 x 3) x (3 x 2) : MAT_OK
+[OK]    (3.g) a x c = (58 64 / 139 154)
+[OK]    (3.f) (3 x 2) x (2 x 3) donne une matrice 3 x 3
+[OK]    a et c n'ont pas ete modifiees
+[OK]    (3.g) 2 x 10^10 depasse INT_MAX : MAT_ERR_DEPASSEMENT
+=== Exercice 3 : cas particuliers ===
+[OK]    resultat = entree refuse, a reste intacte
+[OK]    (3.f) echec d'allocation : MAT_ERR_ALLOCATION, r vide
+
+Bilan : 14 / 14 verifications reussies.
+Pensez a verifier l'absence de fuite : valgrind --leak-check=full ./test_ex3
+
+Compilation : réussie sans avertissement.
 
 Valgrind : [À COMPLÉTER].
 
 #### C. Questions de réflexionA. 
 
 Q5.1. Le paramètre const Matrice *a empêche-t-il d'écrire a->coef[0][0] = 7; ? Que protège exactement const ici ?
-Réponse : [À COMPLÉTER]
+Réponse : Non. const Matrice *a interdit de modifier directement les champs de la structure par a, mais les entiers pointés par a->coef restent modifiables. Pour protéger aussi les coefficients, il faudrait une interface adaptée.
 
 Q5.2. Pourquoi refuse-t-on mat_additionner(&a, &b, &a) alors que, mathématiquement, on peut remplacer A par A + B ?
-Réponse : [À COMPLÉTER]
+Réponse : La fonction traite res comme un paramètre de sortie et exige qu’il soit distinct des entrées. Écraser a ferait perdre l’entrée avant la fin du calcul et risquerait de perdre la mémoire qui lui appartient.
 
 Q5.3. Combien de multiplications d'entiers effectue mat_multiplier pour des matrices n × p et p × q ?
-Réponse : [À COMPLÉTER]
+Réponse : Il y a n × q coefficients dans le résultat et chacun demande p multiplications, soit n × p × q multiplications.
 
 Q5.4. Pourquoi ne suffit-il pas de calculer int s = a + b; puis de tester s < a pour détecter un dépassement ?
-Réponse : [À COMPLÉTER]
+Réponse : Le dépassement d’un int signé est un comportement indéfini en C : le test après le calcul est trop tardif. De plus, s < a ne détecte pas tous les cas. Il faut calculer dans un type plus large puis vérifier les bornes.
 
 ---
 
