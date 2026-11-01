@@ -67,16 +67,23 @@ Valgrind : aucune fuite mémoire ni erreur détectée (ERROR SUMMARY: 0 errors).
 #### C. Questions de réflexion
 
 Q3.1. Pourquoi mat_detruire prend-elle un Matrice * et non un Matrice ? Que se passerait-il, pour l'appelant, avec un passage par valeur ?
+
 Réponse : mat_detruire prend un pointeur pour modifier directement la matrice de l'appelant et la remettre à MATRICE_VIDE après la libération de la mémoire. Avec un passage par valeur, seule une copie de la structure serait modifiée, laissant un pointeur pendant dans la matrice originale.
 
+
 Q3.2. Combien d'appels à calloc et à free faut-il pour une matrice n × p ? Si la k-ième allocation échoue, combien de libérations mat_allouer doit-elle effectuer ?
+
 Réponse : Pour une matrice n × p, il faut n + 1 appels à calloc : un pour le tableau de pointeurs et n pour les lignes. La destruction nécessite n + 1 appels à free. Si la k-ième allocation échoue, mat_allouer doit effectuer k − 1 libérations pour éviter toute fuite mémoire.
 
+
 Q3.3. Pourquoi appeler deux fois mat_detruire sur la même matrice est-il sans danger ? Est-ce encore vrai après Matrice b = a;, puis destruction de a et b ?
+
 Réponse : Après le premier appel, mat_detruire remet la matrice à MATRICE_VIDE. Le deuxième appel est donc sans danger. En revanche, Matrice b = a; effectue une copie superficielle : les deux matrices partagent la même mémoire. Détruire successivement a et b risque alors de provoquer une double libération (double free).
 
+
 Q3.4. Pourquoi mat_allouer commence-t-elle par *res = MATRICE_VIDE, avant de vérifier les dimensions ?
-Réponse : Cette initialisation garantit que la matrice résultat est vide, même si les dimensions sont invalides ou si l'allocation échoue. Elle évite de laisser des pointeurs non initialisés et facilite la gestion des erreurs ainsi que la libération sécurisée de la mémoire.
+
+éponse : Cette initialisation garantit que la matrice résultat est vide, même si les dimensions sont invalides ou si l'allocation échoue. Elle évite de laisser des pointeurs non initialisés et facilite la gestion des erreurs ainsi que la libération sécurisée de la mémoire.
 
 ---
 
@@ -104,16 +111,25 @@ Valgrind : aucune fuite mémoire ni erreur détectée (ERROR SUMMARY: 0 errors).
 #### C. Questions de réflexion
 
 Q4.1. Pourquoi mat_lire remplit-elle d'abord une matrice locale avant de l'affecter à *res ?
+
 Réponse : Une matrice locale permet de construire le résultat entièrement avant de le transmettre à l’appelant. Si une lecture échoue, on libère cette matrice locale et *res reste vide.
 
+
 Q4.2. La lecture vérifie-t-elle que chaque ligne de la matrice est sur sa propre ligne de texte ? Est-ce nécessaire ?
+
 Réponse : Non. lire_entier utilise fscanf, qui accepte les espaces, tabulations et retours à la ligne comme séparateurs. Il suffit de lire le nombre de coefficients annoncé par les dimensions.
 
+
 Q4.3. Après mat_lire(f, &m), le flux f est positionné après le dernier coefficient. Comment cette propriété peut-elle être exploitée ?
+
 Réponse : On peut continuer à lire dans le même flux, par exemple pour récupérer une seconde matrice enregistrée à la suite de la première.
 
+
 Q4.4. Pourquoi mat_ecrire appelle-t-elle fflush avant de renvoyer MAT_OK ? Cela dispense-t-il de vérifier fclose ?
+
 Réponse : fflush force la transmission des données tamponnées et permet de détecter une erreur d’écriture. Cela ne dispense pas de vérifier fclose, qui peut encore signaler une erreur.
+
+
 ---
 
 ### 3.3 Exercice 3 — Calcul matriciel
@@ -143,15 +159,22 @@ Valgrind : aucune fuite mémoire ni erreur détectée (ERROR SUMMARY: 0 errors).
 #### C. Questions de réflexionA. 
 
 Q5.1. Le paramètre const Matrice *a empêche-t-il d'écrire a->coef[0][0] = 7; ? Que protège exactement const ici ?
+
 Réponse : Non. const Matrice *a interdit de modifier directement les champs de la structure par a, mais les entiers pointés par a->coef restent modifiables. Pour protéger aussi les coefficients, il faudrait une interface adaptée.
 
+
 Q5.2. Pourquoi refuse-t-on mat_additionner(&a, &b, &a) alors que, mathématiquement, on peut remplacer A par A + B ?
+
 Réponse : La fonction traite res comme un paramètre de sortie et exige qu’il soit distinct des entrées. Écraser a ferait perdre l’entrée avant la fin du calcul et risquerait de perdre la mémoire qui lui appartient.
 
+
 Q5.3. Combien de multiplications d'entiers effectue mat_multiplier pour des matrices n × p et p × q ?
+
 Réponse : Il y a n × q coefficients dans le résultat et chacun demande p multiplications, soit n × p × q multiplications.
 
+
 Q5.4. Pourquoi ne suffit-il pas de calculer int s = a + b; puis de tester s < a pour détecter un dépassement ?
+
 Réponse : Le dépassement d’un int signé est un comportement indéfini en C : le test après le calcul est trop tardif. De plus, s < a ne détecte pas tous les cas. Il faut calculer dans un type plus large puis vérifier les bornes.
 
 ---
@@ -185,21 +208,18 @@ Valgrind : aucune fuite mémoire ni erreur détectée (21 allocations, 21 libér
 #### C. Questions de réflexion
 
 Q6.1. Pourquoi le message d'erreur est-il affiché par main.c (ou ses fonctions static) et non par mat_lire ? Pensez à un programme graphique réutilisant la bibliothèque.
-Réponse : La fonction `mat_lire` doit seulement lire une matrice et retourner un code d'erreur. C'est au programme principal de décider comment afficher cette erreur.
 
-Cette séparation permet de réutiliser la bibliothèque dans différents programmes. Par exemple, une application graphique pourrait afficher l'erreur dans une fenêtre au lieu de l'afficher dans le terminal.
+Réponse : La fonction `mat_lire` doit seulement lire une matrice et retourner un code d'erreur. C'est au programme principal de décider comment afficher cette erreur. Cette séparation permet de réutiliser la bibliothèque dans différents programmes. Par exemple, une application graphique pourrait afficher l'erreur dans une fenêtre au lieu de l'afficher dans le terminal.
+
 
 Q6.2. Pourquoi le résultat de fclose est-il testé dans sauvegarder mais pas dans charger ?
-Réponse : Dans `sauvegarder`, le résultat de `fclose` est vérifié, car une erreur d'écriture peut apparaître lors de la fermeture du fichier. Certaines données peuvent encore être en mémoire tampon et ne pas avoir été enregistrées.
 
-Dans `charger`, le fichier est ouvert en lecture. La fermeture ne sert pas à enregistrer des données. C'est pourquoi le code fourni ne vérifie pas le résultat de `fclose`.
+Réponse : Dans `sauvegarder`, le résultat de `fclose` est vérifié, car une erreur d'écriture peut apparaître lors de la fermeture du fichier. Certaines données peuvent encore être en mémoire tampon et ne pas avoir été enregistrées. Dans `charger`, le fichier est ouvert en lecture. La fermeture ne sert pas à enregistrer des données. C'est pourquoi le code fourni ne vérifie pas le résultat de `fclose`.
+
 
 Q6.3. Dans le scénario 8, le calcul a réussi mais l'enregistrement a échoué. Combien de matrices faut-il libérer ? Vérifiez que votre programme le fait.
-Réponse : Il faut libérer les trois matrices : A, B et R.
 
-Même si l'enregistrement échoue, les trois matrices ont déjà été créées en mémoire. Le programme utilise `goto nettoyage` pour accéder au point de nettoyage commun.
-
-Les fonctions `mat_detruire(&r)`, `mat_detruire(&b)` et `mat_detruire(&a)` sont alors appelées pour libérer les trois matrices et éviter les fuites de mémoire.
+Réponse : Il faut libérer les trois matrices : A, B et R. Même si l'enregistrement échoue, les trois matrices ont déjà été créées en mémoire. Le programme utilise `goto nettoyage` pour accéder au point de nettoyage commun. Les fonctions `mat_detruire(&r)`, `mat_detruire(&b)` et `mat_detruire(&a)` sont alors appelées pour libérer les trois matrices et éviter les fuites de mémoire.
 
 ## 4. Vérifications mémoire
 
@@ -208,8 +228,11 @@ Les fonctions `mat_detruire(&r)`, `mat_detruire(&b)` et `mat_detruire(&a)` sont 
 Les commandes utilisées sont :
 
 valgrind --leak-check=full ./test_ex1
+
 valgrind --leak-check=full ./test_ex2
+
 valgrind --leak-check=full ./test_ex3
+
 valgrind --leak-check=full ./demo_matrices add donnees/A.txt donnees/B.txt R.txt
 
 Résultats :
