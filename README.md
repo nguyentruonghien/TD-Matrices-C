@@ -10,7 +10,7 @@
 
 - Nom et prénom : NGUYEN Truong Hien
 - Identifiant GitHub : nguyentruonghien
-- Nom et prénom : Ho Viet Manh Hung
+- Nom et prénom : HO Viet Manh Hung
 - Identifiant GitHub : kabigon048
 
 ## 1. Introduction
@@ -62,7 +62,7 @@ Tests : 16/16.
 
 Compilation : préciser si la compilation s'effectue sans avertissement.
 
-Valgrind : [À COMPLÉTER].
+Valgrind : aucune fuite mémoire ni erreur détectée (ERROR SUMMARY: 0 errors).
 
 #### C. Questions de réflexion
 
@@ -128,8 +128,7 @@ Pensez a verifier l'absence de fuite : valgrind --leak-check=full ./test_ex2
 
 Compilation : réussie sans avertissement.
 
-Valgrind : [À COMPLÉTER].
-
+Valgrind : aucune fuite mémoire ni erreur détectée (ERROR SUMMARY: 0 errors).
 #### C. Questions de réflexion
 
 Q4.1. Pourquoi mat_lire remplit-elle d'abord une matrice locale avant de l'affecter à *res ?
@@ -188,7 +187,7 @@ Pensez a verifier l'absence de fuite : valgrind --leak-check=full ./test_ex3
 
 Compilation : réussie sans avertissement.
 
-Valgrind : [À COMPLÉTER].
+Valgrind : aucune fuite mémoire ni erreur détectée (ERROR SUMMARY: 0 errors).
 
 #### C. Questions de réflexionA. 
 
@@ -222,13 +221,13 @@ Fichier : main.c.
 
 #### B. Résultats et vérifications
 
-Compilation : [À COMPLÉTER].
+Compilation : réussie avec Makefile, sans erreur ni avertissement.
 
-Exécution des scénarios : [À COMPLÉTER].
+Exécution des scénarios : l'addition des matrices A et B ainsi que la multiplication des matrices A et C ont réussi. Les résultats enregistrés dans R.txt correspondent aux résultats attendus. Les trois scénarios d'erreur testés (dimensions incompatibles, fichier invalide et fichier incomplet) ont été correctement détectés.
 
-Codes de retour : [À COMPLÉTER].
+Codes de retour : 0 pour les deux opérations réussies et 1 pour les trois scénarios d'erreur testés.
 
-Valgrind : [À COMPLÉTER].
+Valgrind : aucune fuite mémoire ni erreur détectée lors de l'exécution vérifiée. Valgrind indique 21 allocations, 21 libérations et 0 erreur.
 
 #### C. Questions de réflexion
 
@@ -251,18 +250,29 @@ Les fonctions `mat_detruire(&r)`, `mat_detruire(&b)` et `mat_detruire(&a)` sont 
 
 ## 4. Vérifications mémoire
 
-Les tests fonctionnels ne prouvent pas à eux seuls l’absence de fuite mémoire. Valgrind n’étant pas disponible dans l’environnement de vérification utilisé ici, il reste à exécuter sous Linux :
+ Les vérifications mémoire ont été réalisées avec Valgrind 3.19.0 sur une machine virtuelle Debian (Proxmox).
 
-```bash
-valgrind --leak-check=full --show-leak-kinds=all ./test_ex1
-valgrind --leak-check=full --show-leak-kinds=all ./test_ex2
-valgrind --leak-check=full --show-leak-kinds=all ./test_ex3
-valgrind --leak-check=full --show-leak-kinds=all ./demo_matrices mul A.txt C.txt resultat.txt
-```
+Les commandes utilisées sont :
 
-Reporter ici les résultats réels (« definitely lost », « indirectly lost », codes de retour), sans les inventer.
+valgrind --leak-check=full ./test_ex1
+valgrind --leak-check=full ./test_ex2
+valgrind --leak-check=full ./test_ex3
+valgrind --leak-check=full ./demo_matrices add donnees/A.txt donnees/B.txt R.txt
 
-## 5. Démonstration finale
+Résultats :
+
+Exercice 1 : 16/16 tests réussis, aucune fuite mémoire détectée.
+
+Exercice 2 : 14/14 tests réussis, aucune fuite mémoire détectée.
+
+Exercice 3 : 14/14 tests réussis, aucune fuite mémoire détectée.
+
+Exercice 4 : aucune fuite mémoire ni erreur détectée lors de l'exécution vérifiée.
+
+Valgrind indique ERROR SUMMARY: 0 errors et All heap blocks were freed -- no leaks are possible.
+
+Ces résultats montrent que la mémoire a été correctement libérée dans les scénarios testés, sans les inventer.
+
 
 ## 5. Démonstration finale
 
@@ -353,4 +363,4 @@ La dernière exécution observée de GitHub Actions s'est terminée avec le stat
 
 ## 6. Bilan et difficultés
 
-HO Viet Manh Hung: 
+Ce projet nous a permis de mieux comprendre la programmation en C, notamment l'allocation dynamique de mémoire, la manipulation des matrices et la gestion des erreurs. La principale difficulté rencontrée concernait l'utilisation de Git et GitHub. Nous avions créé une autre branche pour travailler sur le projet, mais nous avons oublié de fusionner nos modifications avec la branche principale main jusqu'au dernier jour. Cela a provoqué des difficultés lors de la mise en commun du code. Nous avons donc travaillé ensemble pour résoudre les problèmes de fusion et vérifier les fichiers du projet. Finalement, nous avons réussi à compiler le programme et à faire fonctionner toutes les fonctionnalités. Les tests ont été réussis et Valgrind n'a détecté aucune fuite mémoire dans les scénarios vérifiés. Cette expérience nous a appris l'importance de la communication, du travail en équipe et de la gestion des branches Git.
