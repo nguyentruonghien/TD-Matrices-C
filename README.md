@@ -43,8 +43,69 @@ Les fonctions utilisent le type MatErreur pour signaler les erreurs et garantir 
 ## 3. Réalisation
 
 ### 3.1 Exercice 1 — Allocation et destruction des matrices
+#### A. Code complété 
+/* (1.a) À COMPLÉTER : les cas MAT_ERR_DIMENSIONS et
+     *       MAT_ERR_DEPASSEMENT, sur le même modèle que ci-dessus. */
+    case MAT_ERR_DIMENSIONS:   return "dimensions incompatibles";
 
-#### A. Réalisation
+    case MAT_ERR_DEPASSEMENT: return "depassement de capacite";
+
+/* (1.b) À COMPLÉTER : renvoyer 1 si les QUATRE conditions suivantes
+     *       sont vraies, 0 sinon :
+     *         - m n'est pas NULL ;
+     *         - m->coef n'est pas NULL ;
+     *         - 1 <= m->nb_lignes <= MAT_DIM_MAX ;
+     *         - 1 <= m->nb_colonnes <= MAT_DIM_MAX.
+     *       Une seule instruction suffit :
+     *         return m != NULL && m->coef != NULL && ... ;            */
+    return m!= NULL
+    && m->coef != NULL
+    && m->nb_lignes >= 1
+    && m->nb_lignes <= MAT_DIM_MAX
+    && m->nb_colonnes >= 1
+    && m->nb_colonnes <= MAT_DIM_MAX;    
+
+/* (1.c) À COMPLÉTER : si nb_lignes ou nb_colonnes n'est pas compris
+     *       entre 1 et MAT_DIM_MAX, renvoyer MAT_ERR_ARGUMENT.          */
+    if (nb_lignes < 1 || nb_lignes > MAT_DIM_MAX || nb_colonnes < 1 || nb_colonnes > MAT_DIM_MAX)
+    {
+    return MAT_ERR_ARGUMENT;
+    }
+
+/* (1.d) À COMPLÉTER : allouer chaque ligne.
+     *   for (int i = 0; i < nb_lignes; i++) {
+     *       coef[i] = mat_calloc(..., ...);    // nb_colonnes entiers
+     *       if (coef[i] == NULL) {
+     *           for (int k = i - 1; k >= 0; k--)  // lignes déjà
+     *               free(coef[k]);                // obtenues
+     *           free(coef);                       // puis le tableau
+     *           return MAT_ERR_ALLOCATION;
+     *       }
+     *   }                                                             */
+    for (int i = 0; i < nb_lignes; i++) {
+    coef[i] = mat_calloc((size_t)nb_colonnes, sizeof *coef[i]);
+
+        if (coef[i] == NULL) {
+            for (int k = i - 1; k >= 0; k--) {
+                free(coef[k]);
+            }
+
+            free(coef);
+            return MAT_ERR_ALLOCATION;
+         }
+    }
+
+/* (1.e) À COMPLÉTER : maintenant que tout a réussi, remplir *res
+     *       (trois affectations : coef, nb_lignes, nb_colonnes)
+     *       et renvoyer MAT_OK.                                        */
+    res->coef = coef;
+    res->nb_lignes = nb_lignes;
+    res->nb_colonnes = nb_colonnes;
+
+return MAT_OK;
+
+
+#### B. Réalisation
 
 Fichiers : matrice.c, matrice_alloc.c.
 
@@ -56,7 +117,7 @@ Fichiers : matrice.c, matrice_alloc.c.
 
 - Implémentation de mat_detruire pour libérer la mémoire et réinitialiser la matrice.
 
-#### B. Résultats et vérifications
+#### C. Résultats et vérifications
 
 Tests : 16/16.
 
@@ -64,7 +125,7 @@ Compilation : réussie sans avertissement.v
 
 Valgrind : aucune fuite mémoire ni erreur détectée (ERROR SUMMARY: 0 errors).
 
-#### C. Questions de réflexion
+#### D. Questions de réflexion
 
 Q3.1. Pourquoi mat_detruire prend-elle un Matrice * et non un Matrice ? Que se passerait-il, pour l'appelant, avec un passage par valeur ?
 
@@ -89,7 +150,78 @@ Q3.4. Pourquoi mat_allouer commence-t-elle par *res = MATRICE_VIDE, avant de vé
 
 ### 3.2 Exercice 2 — Entrées-sorties
 
-#### A. Réalisation
+#### A. Code complété 
+
+/* (2.a) À COMPLÉTER : pour chaque ligne i, afficher chaque
+     *       coefficient avec printf(" %8d", m->coef[i][j]),
+     *       puis passer à la ligne avec putchar('\n').               */
+    for (int i = 0; i < m->nb_lignes; i++) {
+        for (int j = 0; j < m->nb_colonnes; j++)
+            printf(" %8d", m->coef[i][j]);
+        putchar('\n');
+    }
+
+/* (2.b) À COMPLÉTER : pour chaque ligne i de la matrice :
+     *         - écrire les coefficients séparés par UN espace :
+     *             le premier (j == 0) avec "%d", les autres avec " %d" ;
+     *         - terminer la ligne avec fputc('\n', f) ;
+     *         - si un fprintf renvoie un nombre < 0, ou si fputc
+     *           renvoie EOF : return MAT_ERR_ECRITURE;               */
+    for (int i = 0; i < m->nb_lignes; i++) {
+        for (int j = 0; j < m->nb_colonnes; j++) {
+            if (fprintf(f, j == 0 ? "%d" : " %d", m->coef[i][j]) < 0)
+                return MAT_ERR_ECRITURE;
+        }
+        if (fputc('\n', f) == EOF)
+            return MAT_ERR_ECRITURE;
+    }
+
+/* (2.c) À COMPLÉTER : si nb_lignes ou nb_colonnes n'est pas compris
+     *       entre 1 et MAT_DIM_MAX, renvoyer MAT_ERR_FORMAT
+     *       (c'est le contenu du fichier qui est faux).               */
+
+
+/* (2.d) À COMPLÉTER : déclarer une matrice LOCALE et l'allouer :
+     *         Matrice tmp;
+     *         err = mat_allouer(&tmp, nb_lignes, nb_colonnes);
+     *         if (err != MAT_OK) return err;                          */
+
+
+/* (2.e) À COMPLÉTER : deux boucles imbriquées (i, puis j) qui lisent
+     *       chaque coefficient avec lire_entier(f, &tmp.coef[i][j]).
+     *       Si une lecture échoue :
+     *         mat_detruire(&tmp);  return err;                        */
+
+
+/* (2.f) À COMPLÉTER : tout a réussi, on transfère le résultat :
+     *         *res = tmp;  return MAT_OK;                             */
+
+    /* ligne provisoire : à remplacer en (2.f) */
+    
+    if (nb_lignes < 1 || nb_lignes > MAT_DIM_MAX ||
+        nb_colonnes < 1 || nb_colonnes > MAT_DIM_MAX)
+        return MAT_ERR_FORMAT;
+
+    Matrice tmp = MATRICE_VIDE;
+    err = mat_allouer(&tmp, nb_lignes, nb_colonnes);
+    if (err != MAT_OK)
+        return err;
+
+    for (int i = 0; i < nb_lignes; i++) {
+        for (int j = 0; j < nb_colonnes; j++) {
+            err = lire_entier(f, &tmp.coef[i][j]);
+            if (err != MAT_OK) {
+                mat_detruire(&tmp);
+                return err;
+            }
+        }
+    }
+    *res = tmp;
+    return MAT_OK;
+
+
+
+#### B. Réalisation
 
 Fichier : matrice_io.c.
 
@@ -101,14 +233,14 @@ Fichier : matrice_io.c.
 
 Gestion des erreurs de lecture et libération de la mémoire en cas d'échec.
 
-#### B. Résultats et vérifications
+#### C. Résultats et vérifications
 
 Tests : 14/14.
 
 Compilation : réussie sans avertissement.
 
 Valgrind : aucune fuite mémoire ni erreur détectée (ERROR SUMMARY: 0 errors).
-#### C. Questions de réflexion
+#### D. Questions de réflexion
 
 Q4.1. Pourquoi mat_lire remplit-elle d'abord une matrice locale avant de l'affecter à *res ?
 
@@ -134,7 +266,71 @@ Réponse : fflush force la transmission des données tamponnées et permet de d�
 
 ### 3.3 Exercice 3 — Calcul matriciel
 
-#### A. Réalisation
+#### A. Code complété 
+
+/* (3.a) À COMPLÉTER : si a et b n'ont pas le même nombre de lignes
+     *       OU pas le même nombre de colonnes,
+     *       renvoyer MAT_ERR_DIMENSIONS.                              */
+    if (a->nb_lignes != b->nb_lignes || a->nb_colonnes != b->nb_colonnes)
+        return MAT_ERR_DIMENSIONS;
+
+
+    /* (3.b) À COMPLÉTER : allouer r avec les dimensions de a ;
+     *         err = mat_allouer(&r, ..., ...);
+     *         if (err != MAT_OK) return err;                          */
+    Matrice r = MATRICE_VIDE;
+    err = mat_allouer(&r, a->nb_lignes, a->nb_colonnes);
+    if (err != MAT_OK)
+        return err;
+
+/* (3.c) À COMPLÉTER : calculer la somme des coefficients
+             *       (i, j) de a et de b EN long long :
+             *         long long s = (long long)a->coef[i][j] + ... ;  */
+            long long s = (long long)a->coef[i][j] + b->coef[i][j];
+
+/* (3.d) À COMPLÉTER : transférer le résultat :
+     *         *res = r;  return MAT_OK;                               */
+    *res = r;
+    return MAT_OK;
+
+/* (3.e) À COMPLÉTER : le produit a x b n'existe que si le nombre de
+     *       COLONNES de a est égal au nombre de LIGNES de b.
+     *       Sinon, renvoyer MAT_ERR_DIMENSIONS.                       */
+     if (a->nb_colonnes != b->nb_lignes)
+        return MAT_ERR_DIMENSIONS;
+
+    /* (3.f) À COMPLÉTER : allouer r de dimensions
+     *       (lignes de a) x (colonnes de b).                          */
+    Matrice r = MATRICE_VIDE;
+    err = mat_allouer(&r, a->nb_lignes, b->nb_colonnes);
+    if (err != MAT_OK)
+        return err;
+
+/* (3.g) À COMPLÉTER : boucle sur k, de 0 à a->nb_colonnes - 1,
+             *       qui ajoute à s le produit a(i,k) x b(k,j) :
+             *
+             *   for (int k = 0; k < a->nb_colonnes; k++) {
+             *       long long p = (long long)a->coef[i][k] * b->coef[k][j];
+             *       if ((p > 0 && s > LLONG_MAX - p)
+             *           || (p < 0 && s < LLONG_MIN - p)) {
+             *           mat_detruire(&r);
+             *           return MAT_ERR_DEPASSEMENT;
+             *       }
+             *       s += p;
+             *   }                                                     */
+            for (int k = 0; k < a->nb_colonnes; k++) {
+                long long produit = (long long)a->coef[i][k] * b->coef[k][j];
+                if ((produit > 0 && s > LLONG_MAX - produit) ||
+                    (produit < 0 && s < LLONG_MIN - produit)) {
+                    mat_detruire(&r);
+                    return MAT_ERR_DEPASSEMENT;
+                }
+                s += produit; 
+
+/* (3.h) À COMPLÉTER : *res = r;  return MAT_OK;                    */
+   *res = r;
+    return MAT_OK;
+#### B. Réalisation
  
 Fichier : matrice_calcul.c.
 
@@ -148,7 +344,7 @@ Fichier : matrice_calcul.c.
 
 - Préservation des matrices d'entrée et libération de la mémoire en cas d'échec.
 
-#### B. Résultats et vérifications
+#### C. Résultats et vérifications
 
 Tests : 14/14.
 
@@ -156,7 +352,7 @@ Compilation : réussie sans avertissement.
 
 Valgrind : aucune fuite mémoire ni erreur détectée (ERROR SUMMARY: 0 errors).
 
-#### C. Questions de réflexionA. 
+#### D. Questions de réflexionA. 
 
 Q5.1. Le paramètre const Matrice *a empêche-t-il d'écrire a->coef[0][0] = 7; ? Que protège exactement const ici ?
 
@@ -181,7 +377,49 @@ Réponse : Le dépassement d’un int signé est un comportement indéfini en C 
 
 ### 3.4 Exercice 4 — Démonstration complète
 
-#### A. Réalisation
+#### A. Code complété 
+
+/* (4.a) À COMPLÉTER : afficher A et B avec mat_afficher.          */
+    mat_afficher("A", &a);
+    mat_afficher("B", &b);
+
+/* (4.b) À COMPLÉTER : calculer r.
+     *         MatErreur err = addition ? mat_additionner(&a, &b, &r)
+     *                                  : mat_multiplier(&a, &b, &r);
+     *       Si err != MAT_OK : afficher sur stderr un message utilisant
+     *       mat_message_erreur(err) et les dimensions de A et de B,
+     *       puis : goto nettoyage;                                    */
+    MatErreur err = addition
+        ? mat_additionner(&a, &b, &r)
+        : mat_multiplier(&a, &b, &r);
+
+    if (err != MAT_OK) {
+        fprintf(stderr,
+            "Erreur : calcul impossible : %s ",
+            mat_message_erreur(err));
+
+        fprintf(stderr,
+            "(A : %d x %d, B : %d x %d)\n",
+            a.nb_lignes, a.nb_colonnes,
+            b.nb_lignes, b.nb_colonnes);
+
+        goto nettoyage;
+    }
+
+/* (4.c) À COMPLÉTER : afficher r (nom "R = A + B" ou "R = A x B").  */
+    mat_afficher(
+        addition ? "R = A + B" : "R = A x B",
+        &r
+    );
+
+/* (4.d) À COMPLÉTER : tout a réussi :
+     *         - afficher "Résultat enregistré dans \"...\"." ;
+     *         - statut = EXIT_SUCCESS;                                 */
+    printf("Résultat enregistré dans \"%s\".\n", argv[4]);
+
+    statut = EXIT_SUCCESS; 
+
+#### B. Réalisation
 
 Fichier : main.c.
 
@@ -193,7 +431,7 @@ Fichier : main.c.
 
 - Gestion des erreurs et libération des matrices avant la fin du programme.
 
-#### B. Résultats et vérifications
+#### C. Résultats et vérifications
 
 Compilation : réussie sans erreur ni avertissement.
 
@@ -205,7 +443,7 @@ Codes de retour : 0 en cas de succès, 1 en cas d'erreur.
 
 Valgrind : aucune fuite mémoire ni erreur détectée (21 allocations, 21 libérations, 0 erreur).
 
-#### C. Questions de réflexion
+#### D. Questions de réflexion
 
 Q6.1. Pourquoi le message d'erreur est-il affiché par main.c (ou ses fonctions static) et non par mat_lire ? Pensez à un programme graphique réutilisant la bibliothèque.
 
