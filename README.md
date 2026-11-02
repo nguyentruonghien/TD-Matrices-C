@@ -44,6 +44,7 @@ Les fonctions utilisent le type MatErreur pour signaler les erreurs et garantir 
 
 ### 3.1 Exercice 1 — Allocation et destruction des matrices
 #### A. Code complété 
+```
 /* (1.a) À COMPLÉTER : les cas MAT_ERR_DIMENSIONS et
      *       MAT_ERR_DEPASSEMENT, sur le même modèle que ci-dessus. */
     case MAT_ERR_DIMENSIONS:   return "dimensions incompatibles";
@@ -103,8 +104,7 @@ Les fonctions utilisent le type MatErreur pour signaler les erreurs et garantir 
     res->nb_colonnes = nb_colonnes;
 
 return MAT_OK;
-
-
+```
 #### B. Réalisation
 
 Fichiers : matrice.c, matrice_alloc.c.
@@ -151,7 +151,7 @@ Q3.4. Pourquoi mat_allouer commence-t-elle par *res = MATRICE_VIDE, avant de vé
 ### 3.2 Exercice 2 — Entrées-sorties
 
 #### A. Code complété 
-
+```
 /* (2.a) À COMPLÉTER : pour chaque ligne i, afficher chaque
      *       coefficient avec printf(" %8d", m->coef[i][j]),
      *       puis passer à la ligne avec putchar('\n').               */
@@ -218,9 +218,7 @@ Q3.4. Pourquoi mat_allouer commence-t-elle par *res = MATRICE_VIDE, avant de vé
     }
     *res = tmp;
     return MAT_OK;
-
-
-
+```
 #### B. Réalisation
 
 Fichier : matrice_io.c.
@@ -267,7 +265,7 @@ Réponse : fflush force la transmission des données tamponnées et permet de d�
 ### 3.3 Exercice 3 — Calcul matriciel
 
 #### A. Code complété 
-
+```
 /* (3.a) À COMPLÉTER : si a et b n'ont pas le même nombre de lignes
      *       OU pas le même nombre de colonnes,
      *       renvoyer MAT_ERR_DIMENSIONS.                              */
@@ -330,6 +328,7 @@ Réponse : fflush force la transmission des données tamponnées et permet de d�
 /* (3.h) À COMPLÉTER : *res = r;  return MAT_OK;                    */
    *res = r;
     return MAT_OK;
+```    
 #### B. Réalisation
  
 Fichier : matrice_calcul.c.
@@ -378,7 +377,7 @@ Réponse : Le dépassement d’un int signé est un comportement indéfini en C 
 ### 3.4 Exercice 4 — Démonstration complète
 
 #### A. Code complété 
-
+```
 /* (4.a) À COMPLÉTER : afficher A et B avec mat_afficher.          */
     mat_afficher("A", &a);
     mat_afficher("B", &b);
@@ -418,7 +417,7 @@ Réponse : Le dépassement d’un int signé est un comportement indéfini en C 
     printf("Résultat enregistré dans \"%s\".\n", argv[4]);
 
     statut = EXIT_SUCCESS; 
-
+```
 #### B. Réalisation
 
 Fichier : main.c.
